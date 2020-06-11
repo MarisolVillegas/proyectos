@@ -1,0 +1,1181 @@
+
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+struct USUARIOS{
+	int idUsuario;
+	char SUsuario[7];
+	char sPassword[9];
+	char sNombre[10];
+	int nEstatus;
+	int nTipo;
+}USUARIO[' '];
+
+struct CLIENTES{
+	int idCliente;
+	char Nombre[' '];
+	char Calle[' '];
+	char Colona[' '];
+	int Num_casa;
+	int Telefono;
+	int Estatus;
+}cliente[' '];
+
+struct PRODUCTOS{
+	int idProducto;
+	char Descripcion[' '];
+	int idTipoProd;
+	int nExistencia;
+	float Precio;
+	int Estatus;
+}producto[' '];
+
+struct TIPOPRODUCTOS{
+	int idTipoProd;
+	char Descripcion[' '];
+	int Estatus;
+}tipoproducto[' '];
+
+//AUXILIARES
+int validar_tel(); //VALIDA QUE EL TELÉFONO SEA POSITIVO Y NO CARACTER.
+int validar_casa(); //VALIDA QUE EL NÚMERO DE CASA SEA POSITIVO Y NO CARACTER.
+int salida(); //VALIDA SI DESEA SALIR.
+int mostrar_producto(struct PRODUCTOS p,int *num_pro); //MUESTRA EL PRODUCTO QUE DESEA RESURTIR.
+void consulta(int num_menu, int *nume); //CONSULTA DE LOS MENÚS.
+void historial_ventas();//HISTORIAL VENTAS NO HECHO.
+void historial_pedidos();//HISTORIAL PEDIDOS NO HECHO.
+void reporte_tipoproductos();//REPORTE PRODUCTOS NO HECHO.
+
+//LECTURA DE ARCHIVOS.
+int leer_usuarios(struct USUARIOS us);
+void leer_clientes(struct CLIENTES c,int *num_cl);
+void leer_productos(struct PRODUCTOS p,int *num_pro);
+void leer_tipoproductos(struct TIPOPRODUCTOS TP,int *num_tipro);
+
+//VALIDADORES
+int verificar(struct USUARIOS us,int j,int *num_us); //VERIFICA QUE EL USUARIO Y CONTRASEÑA SEAN CORRECTOS, O SEA, LOGIN
+int determina(struct USUARIOS us, int aux3); //DETERMINA SI ES ACTIVO/INACTIVO O CAJERO/ADMINISTRADOR.
+
+//MENUS Y SUBMENUS.
+int menus(struct USUARIOS us,int *num_us,int tipo_usuario); //MANDA EL MENÚ QUE LE CORRESPONDE SI ES CAJERO O ADMINISTRADOR.
+void sub_menus(int men,struct CLIENTES c,int *num_cl,int *num_pro,int *num_tipro); //MANDA LOS SUBMENUS.
+void switch_registroclientes(int opc_submenu,struct CLIENTES c,int *num_cl);
+void switch_registroproductos(int opc_submenu,struct PRODUCTOS p,int *num_pro);
+void switch_tipoproductos(int opc_submenu,struct TIPOPRODUCTOS TP,int *num_tipro);
+void submenus_registros(); //MANDA LOS SUBMENUS DE REGISTRO Y TIPO PRODUCTO.
+void submenus_registros1(); //MANDA EL SUBMENU DE PRODUCTO.
+void switch_pedidoventa(int opc_submenu); //MANDA LOS SUBMENUS DE PEDIDO/VENTA.
+void submenu_pedido(); //SUBMENU DE PEDIDOS
+void submenu_venta(); //SUBMENU DE VENTAS
+void switch_historial(int opc_submenu);
+
+//LLENADO DE ESTRUCTURAS.
+void registro_cliente(struct CLIENTES c,int *num_cl);
+void registro_producto(struct PRODUCTOS p,int *num_pro);
+void registro_tipoproducto(struct TIPOPRODUCTOS TP,int *num_tipro);
+
+// BAJAS DE ESTRUCTURAS 
+void bajas_clientes(struct CLIENTES c,int *num_cl);
+void bajas_productos(struct PRODUCTOS p,int *num_pro);
+void bajas_tipoproducto(struct TIPOPRODUCTOS TP,int *num_tipro);
+
+//RESURTIR PRODUCTOS.
+void resurtido(struct PRODUCTOS p,int *num_pro);
+
+int main(){
+	//AUXILIARES
+	int j;	
+	//i = for incrementador, j = cantidad de usuarios
+	
+	int u=0;
+	int *num_us; 
+	num_us=&u;
+	//*num_us = Nos ayuda a determinar la posición en que se encuentra el usuario, ya sea administrador o cajero.
+	
+	int c=0;
+	int *num_cl;
+	num_cl=&c;
+	//*num_cl = número de clientes.
+
+	int p=0; 
+	int *num_pro;
+	num_pro=&p;
+	//*num_pro = número de productos.
+	
+	int *num_tipro;
+	int tp=0;
+	num_tipro=&tp;
+	//*num_tipro = número de tipo productos.
+	
+	//MENUS
+	int tipo_usuario; 
+	//tipo_usuario = Si es cajero o administrador/ si es activo o inactivo.
+	int men,sub_men; 
+	//men = Regresa la opción del menú, sub_men = Regresa la opción del submenu.
+	
+	//LEER USUARIOS
+	j=leer_usuarios(USUARIO[' ']);
+	leer_clientes(cliente[' '],num_cl);
+	leer_productos(producto[' '],num_pro);
+	leer_tipoproductos(tipoproducto[' '],num_tipro);
+	
+	//VERIFICA QUE EL USUARIO SEA CORRECTO...
+	tipo_usuario=verificar(USUARIO[' '],j,num_us);
+	do{
+		men=menus(USUARIO[' '],num_us,tipo_usuario);
+
+		sub_menus(men,cliente[' '],num_cl,num_pro,num_tipro);
+		/*printf("%d\n",sub_men);
+		system("pause");*/
+
+	}while(men!=0);
+	
+	//MENSAJE DE SALIDA
+	printf("\n\t\t\t%cHasta luego%c, regrese pronto :D.\n",173,33);
+	system("pause");
+	return 0;
+	
+}
+														//SECCIÓN GUARDADO.
+
+void bajas_tipoproducto(struct TIPOPRODUCTOS TP,int *num_tipro){
+	int num,i;
+	num=*num_tipro;
+	int bj,s,au,aux=0;
+	do {
+		do {
+			do{
+				system("cls");
+				printf("\t\t\tIngrese el id del producto: ");
+				scanf("%d",&bj);
+				fflush(stdin);
+			}while(bj<=0);
+			for (i=0;i<num;i++) {
+				if (bj==tipoproducto[i].idTipoProd) {
+					aux=1;
+					au=i;
+				}
+				if (tipoproducto[i].Estatus==0) {
+					aux=0;
+				}
+			}
+			if (aux==0) {
+				printf("\t\t\tEl id del producto no existe o ya se dio de baja.\n");
+				aux=1;
+			}
+			else {
+				printf("\t\t\tDescripcion: %s.\n",tipoproducto[au].Descripcion);
+				printf("\t\t\t%cSeguro de que quiere dar de baja a este producto?\n",168);
+				do {
+						printf("\t\t1. S%c.\n\t\t2. No.\n\t\t>",161);
+						scanf("%d",&aux);
+						fflush(stdin);
+				} while (aux<1 || aux>2);
+				if (aux==1) {
+					producto[au].Estatus=0;
+				}
+				else {
+					aux=0;
+				}
+			}
+		} while(aux==0);
+		s=salida();
+		system("cls");
+	} while(s==2);
+	FILE *tipro;
+	tipro=fopen("TIPOPRODUCTOS.txt","w");
+	if(tipro==NULL){
+		printf("No se pudo abrir el archivo.\n");
+	} else{
+		fprintf(tipro,"%d\n",num);
+		for(i=0;i<num;i++){
+			fprintf(tipro,"%d\n",tipoproducto[i].idTipoProd);
+			fprintf(tipro,"%s\n",tipoproducto[i].Descripcion);
+			fprintf(tipro,"%d\n",tipoproducto[i].Estatus);
+		}
+	}
+	fclose(tipro);
+}
+
+void registro_tipoproducto(struct TIPOPRODUCTOS TP,int *num_tipro){
+	//AUXILIARES
+	int num; 
+	num=*num_tipro;
+	//num = Numeros de clientes que se han ingresado	//Lee los tipoproducotos introducidos por el usuario
+	int i;
+	//i = Aumentador del for, num_casa = validador si el número es positivo, tel = validador si el número es positivo.
+	int sal; 
+	//sal = Opcion por si quiere salir
+	int numpro;
+	//numpro = entra en el validador si es positivo o un caracter.
+	do{
+		printf("\t\t\t\t\t    Producto: [%d]\n",num+1);
+		do{
+			printf("\t\t\tIngrese el 'id' del tipo producto: ");
+			scanf("%d",&numpro);
+			fflush(stdin);
+		}while(numpro<=0);
+		tipoproducto[num].idTipoProd=numpro;
+		printf("\t\t\tIngrese la descripci%cn del tipo producto: ",162);
+		gets(tipoproducto[num].Descripcion);
+		fflush(stdin);
+		tipoproducto[num].Estatus=1;
+		sal=salida();
+		if(sal==2){
+			num++;
+		} 
+		system("cls");
+	}while(sal==2);
+	num++;
+	//GUARDA LOS DATOS QUE SE HAYAN ALMACENADO EN LA ESTRUCTURA.
+	FILE *tipro;
+	tipro=fopen("TIPOPRODUCTOS.txt","w");
+	if(tipro==NULL){
+		printf("No se pudo abrir el archivo.\n");
+	} else{
+		fprintf(tipro,"%d\n",num);
+		for(i=0;i<num;i++){
+			fprintf(tipro,"%d\n",tipoproducto[i].idTipoProd);
+			fprintf(tipro,"%s\n",tipoproducto[i].Descripcion);
+			fprintf(tipro,"%d\n",tipoproducto[i].Estatus);
+		}
+	}
+	fclose(tipro);
+	*num_tipro=num;
+	
+}
+
+void bajas_productos(struct PRODUCTOS p,int *num_pro) {
+	int num,i;
+	num=*num_pro;
+	int bj,s,au,aux=0;
+	do {
+		do {
+			do{
+				system("cls");
+				printf("\t\t\tIngrese el id del producto: ");
+				scanf("%d",&bj);
+				fflush(stdin);
+			}while(bj<=0);
+			for (i=0;i<num;i++) {
+				if (bj==producto[i].idProducto) {
+					aux=1;
+					au=i;
+				}
+				if (producto[i].Estatus==0) {
+					aux=0;
+				}
+			}
+			if (aux==0) {
+				printf("\t\t\tEl id del producto no existe o ya se dio de baja.\n");
+				aux=1;
+			}
+			else {
+				printf("\t\t\tDescripcion: %s.\n",producto[au].Descripcion);
+				printf("\t\t\t%cSeguro de que quiere dar de baja a este producto?\n",168);
+				do {
+						printf("\t\t1. S%c.\n\t\t2. No.\n\t\t>",161);
+						scanf("%d",&aux);
+						fflush(stdin);
+				} while (aux<1 || aux>2);
+				if (aux==1) {
+					producto[au].Estatus=0;
+				}
+				else {
+					aux=0;
+				}
+			}
+		} while(aux==0);
+		s=salida();
+		system("cls");
+	} while(s==2);
+		FILE *pro;
+	pro=fopen("PRODUCTOS.txt","w");
+	if(pro==NULL){
+		printf("No se pudo abrir el archivo.\n");
+	} else{
+		fprintf(pro,"%d\n",num);
+		for(i=0;i<num;i++){
+			fprintf(pro,"%d\n",producto[i].idProducto);
+			fprintf(pro,"%s\n",producto[i].Descripcion);
+			fprintf(pro,"%d %d  %3.2f %d\n",producto[i].idTipoProd,producto[i].nExistencia,producto[i].Precio,producto[i].Estatus);
+		}
+	}
+	fclose(pro);
+}
+													 													
+void switch_registroclientes(int opc_submenu,struct CLIENTES c,int *num_cl){
+	switch(opc_submenu){
+		case 1:{registro_cliente(cliente[' '],num_cl);
+			break;
+		}
+  		case 2:{bajas_clientes(cliente[' '],num_cl);
+			break;
+		} 
+		case 3:{consulta(1,num_cl);
+			break;
+		} 
+	}
+}
+
+void bajas_clientes(struct CLIENTES c,int *num_cl) {
+	int num,i;
+	num=*num_cl;
+	int bj,s,au,aux=0;
+		do {
+			do {
+			system("cls");
+			do{
+				printf("\t\t\tIngrese el id del usuario que quiera dar de baja: ");
+				scanf("%d",&bj);
+				fflush(stdin);
+			}while(bj<=0);
+			for (i=0;i<num;i++) {
+				if (bj==cliente[i].idCliente) {
+					aux=1;
+					au=i;
+				}
+				if (cliente[i].Estatus==0) {
+					aux=0;
+				}
+			}
+			if (aux==0) {
+				printf("\t\t\tEl id del usuario no existe o ya se dio de baja \n");
+				aux=1;
+			}
+			else {
+				printf("\t\t\tNombre: %s\n",cliente[au].Nombre);
+				printf("\t\t\tCol. %s Calle: %s Num. Casa: %d \n",cliente[au].Colona,cliente[au].Calle,cliente[au].Num_casa);
+				printf("\t\t\t%cSeguro de que quiere dar de baja a este cliente?\n",168);
+				do {
+					printf("\t\t1. S%c.\n\t\t2. No.\n\t\t>",161);
+					scanf("%d",&aux);
+					fflush(stdin);
+				} while (aux<1 || aux>2);
+				if (aux==1) {
+					cliente[au].Estatus=0;
+				}
+					else {
+						aux=0;
+			 		}
+				}
+			} while(aux==0);
+			s=salida();
+			system("cls");
+		} while(s==2);
+	FILE *cli;
+	cli=fopen("clientes.txt","w");
+	if(cli==NULL){
+		printf("No se pudo abrir el archivo.\n");
+	} else{
+		fprintf(cli,"%d\n",num);
+		for(i=0;i<num;i++){
+			fprintf(cli,"%d\n",cliente[i].idCliente);
+			fprintf(cli,"%s\n",cliente[i].Nombre);
+			fprintf(cli,"%s\n",cliente[i].Calle);
+			fprintf(cli,"%s\n",cliente[i].Colona);
+			fprintf(cli,"%d %d %d\n",cliente[i].Num_casa,cliente[i].Telefono,cliente[i].Estatus);
+		}
+	}
+	fclose(cli);
+}
+													
+void resurtido(struct PRODUCTOS p, int *num_pro){
+	//AUXILIARES
+	int n;
+	//n = es el número de la posición en que se encuentra el producto.
+	int res;
+	//res = es la cantidad a resurtir. 
+	int i;
+	//i = controlador del for.
+	int num;
+	num=*num_pro;
+	n=mostrar_producto(producto[' '],num_pro);
+	system("cls");
+	if(n>0){
+		do{
+		 	printf("\t\t\tIngrese la cantidad a resurtir: ");
+			scanf("%d",&res);
+			fflush(stdin);
+			system("cls");
+		}while(res<=0);
+		producto[n].nExistencia=producto[n].nExistencia+res;
+		printf("\t\t\tAhora la cantidad de %s es de %d.\n",producto[n].Descripcion,producto[n].nExistencia);
+		system("pause");
+		//GUARDA EL NUEVO RESURTIDO DE PRODUCTOS
+		FILE *pro;
+		pro=fopen("PRODUCTOS.txt","w");
+		if(pro==NULL){
+			printf("No se pudo abrir el archivo.\n");
+		} else{
+			fprintf(pro,"%d\n",num);
+			for(i=0;i<num;i++){
+				fprintf(pro,"%d\n",producto[i].idProducto);
+				fprintf(pro,"%s\n",producto[i].Descripcion);
+				fprintf(pro,"%d %d  %3.2f %d\n",producto[i].idTipoProd,producto[i].nExistencia,producto[i].Precio,producto[i].Estatus);
+			}
+		}
+		fclose(pro);
+		system("cls");
+	} else{
+		
+	}
+}														
+														
+void registro_producto(struct PRODUCTOS p,int *num_pro){
+	//AUXILIARES
+	int num; 
+	num=*num_pro;
+	//num = Numeros de clientes que se han ingresado	//Lee los clientes introducidos por el usuario
+	int i;
+	//i = Aumentador del for, num_casa = validador si el número es positivo, tel = validador si el número es positivo.
+	int sal; 
+	//sal = Opcion por si quiere salir
+	int id,id2=0,ex=0;
+	float pr=0;
+	do{
+		printf("\t\t\t\t\t    Producto: [%d]\n",num+1);
+		do{
+			printf("\t\t\tIngrese el 'id' del producto: ");
+			scanf("%d",&id);
+			fflush(stdin);
+		}while(id<=0);
+		fflush(stdin);
+		producto[num].idProducto=id;
+		printf("\t\t\tIngrese la descripci%cn del producto: ",162);
+		gets(producto[num].Descripcion);
+		fflush(stdin);
+		do{
+			printf("\t\t\tIngrese el 'id' de tipo de producto: ");
+			scanf("%d",&id2);
+			fflush(stdin);
+		}while(id<=0);
+		producto[num].idTipoProd=id2;
+		fflush(stdin);
+		do{
+			printf("\t\t\tIngrese la cantidad en existencia: ");
+			scanf("%d",&ex);
+			fflush(stdin);
+		}while(id<=0);
+		producto[num].nExistencia=ex;
+		do{
+			printf("\t\t\tIngrese el precio del producto: ");
+			scanf("%f",&pr);	
+			fflush(stdin);
+		}while(pr<=0);
+		producto[num].Precio=pr;
+		producto[num].Estatus=1;
+		sal=salida();
+		if(sal==2){
+			num++;
+		} 
+		system("cls");
+	}while(sal==2);
+	num++;
+	//GUARDA LOS DATOS QUE SE HAYAN ALMACENADO EN LA ESTRUCTURA.
+	FILE *pro;
+	pro=fopen("PRODUCTOS.txt","w");
+	if(pro==NULL){
+		printf("No se pudo abrir el archivo.\n");
+	} else{
+		fprintf(pro,"%d\n",num);
+		for(i=0;i<num;i++){
+			fprintf(pro,"%d\n",producto[i].idProducto);
+			fprintf(pro,"%s\n",producto[i].Descripcion);
+			fprintf(pro,"%d %d  %3.2f %d\n",producto[i].idTipoProd,producto[i].nExistencia,producto[i].Precio,producto[i].Estatus);
+		}
+	}
+	fclose(pro);
+	*num_pro=num;
+}
+
+void registro_cliente(struct CLIENTES c,int *num_cl){
+	//AUXILIARES
+	int num; 
+	num=*num_cl;
+	//num = Numeros de clientes que se han ingresado	//Lee los clientes introducidos por el usuario
+	int i, num_casa, tel;
+	//i = Aumentador del for, num_casa = validador si el número es positivo, tel = validador si el número es positivo.
+	int sal; 
+	//sal = Opcion por si quiere salir
+	do{
+		printf("\t\t\t\t\t    Cliente: [%d]\n",num+1);
+		cliente[num].idCliente=num+1;
+		printf("\t\t\tIngrese su nombre: ");
+		gets(cliente[num].Nombre);
+		fflush(stdin);
+		printf("\t\t\tIngrese su calle: ");
+		gets(cliente[num].Calle);
+		fflush(stdin);
+		printf("\t\t\tIngrese su colonia: ");
+		gets(cliente[num].Colona);
+		fflush(stdin);
+		cliente[num].Num_casa=validar_casa();
+		fflush(stdin);
+		cliente[num].Telefono=validar_tel();
+		cliente[num].Estatus=1;
+		sal=salida();
+		if(sal==2){
+			num++;
+		} 
+		system("cls");
+	}while(sal==2);
+	num++;
+	//GUARDA LOS DATOS QUE SE HAYAN ALMACENADO EN LA ESTRUCTURA.
+	FILE *cli;
+	cli=fopen("clientes.txt","w");
+	if(cli==NULL){
+		printf("No se pudo abrir el archivo.\n");
+	} else{
+		fprintf(cli,"%d\n",num);
+		for(i=0;i<num;i++){
+			fprintf(cli,"%d\n",cliente[i].idCliente);
+			fprintf(cli,"%s\n",cliente[i].Nombre);
+			fprintf(cli,"%s\n",cliente[i].Calle);
+			fprintf(cli,"%s\n",cliente[i].Colona);
+			fprintf(cli,"%d %d %d\n",cliente[i].Num_casa,cliente[i].Telefono,cliente[i].Estatus);
+		}
+	}
+	fclose(cli);
+	*num_cl=num;
+}
+
+													//SECCIÓN LECTURA DE DATOS GUARDADOS EN ARCHIVOS.
+//Lee los tipos de productos.
+void leer_tipoproductos(struct TIPOPRODUCTOS TP,int *num_tipro){
+	FILE *tipro;
+	int num;
+	int i;
+	tipro=fopen("TIPOPRODUCTOS.txt","r");
+	if(tipro==NULL){
+		printf("No se pudo abrir el archivo.\n");
+	}else{
+		fscanf(tipro,"%d",&num);
+		if(num==0){
+		} else{
+			for(i=0;i<num;i++){
+				fscanf(tipro,"%d %[^\n] %d",&tipoproducto[i].idTipoProd,tipoproducto[i].Descripcion,&tipoproducto[i].Estatus);
+			}	
+		}
+	}
+	fclose(tipro);
+	*num_tipro=num;
+}
+
+//Leer los datos del archivo productos.
+void leer_productos(struct PRODUCTOS p,int *num_pro){
+	FILE *pro;
+	int num;
+	int i;
+	pro=fopen("PRODUCTOS.txt","r");
+	if(pro==NULL){
+		printf("No se pudo abrir el archivo.\n");
+	}else{
+		fscanf(pro,"%d",&num);
+		if(num==0){
+		} else{
+			for(i=0;i<num;i++){
+				fscanf(pro,"%d %[^\n] %d %d %f %d",&producto[i].idProducto,producto[i].Descripcion,&producto[i].idTipoProd,&producto[i].nExistencia,&producto[i].Precio,&producto[i].Estatus);
+			}	
+		}
+	}
+	fclose(pro);
+	*num_pro=num;
+}
+
+//Lee los datos del archivo de clientes.
+void leer_clientes(struct CLIENTES c,int *num_cl){
+	FILE *cli;
+	int num;
+	//num = Número de clientes almacenado en la parte de arriba del archivo.
+	int i;
+	cli=fopen("clientes.txt","r");
+	if(cli==NULL){
+		printf("No se pudo abrir el archivo.\n");
+	}else{
+		fscanf(cli,"%d",&num);
+		if(num==0){
+		} else{
+			for(i=0;i<num;i++){
+				fscanf(cli,"%d %[^\n] %[^\n] %[^\n] %d %d %d",&cliente[i].idCliente,cliente[i].Nombre,cliente[i].Calle,cliente[i].Colona,&cliente[i].Num_casa,&cliente[i].Telefono,&cliente[i].Estatus);
+			}	
+		}
+	}
+	fclose(cli);
+	*num_cl=num;
+	/*for(i=0;i<num;i++){
+		printf("%d %s %s %s %s %d %d %d\n",cliente[i].idCliente,cliente[i].Nombre,cliente[i].Calle,cliente[i].Colona,cliente[i].Num_casa,cliente[i].Telefono,cliente[i].Estatus);
+	}*/
+}
+
+//Lee los datos del archivo de users.
+int leer_usuarios(struct USUARIOS us){
+	int i,j;
+	//ARCHIVOS
+	FILE *users;
+
+	//LEER LOS DATOS DE LOS USUARIOS
+	users=fopen("USERS.txt","r");
+	if(users==NULL){
+		printf("\t\t\tNo se ha podido abrir el archivo.\n");
+	} else{
+		fscanf(users,"%d",&j);
+		j=j+1;
+		for(i=0;i<j;i++){
+			fscanf(users,"%d %s %s %s %d %d",&USUARIO[i].idUsuario,USUARIO[i].SUsuario,USUARIO[i].sPassword,USUARIO[i].sNombre,&USUARIO[i].nEstatus,&USUARIO[i].nTipo);
+		}
+	}
+	fclose(users);
+	return j;
+}
+
+													//SECCIÓN PARA IMPRIMIR MENUS Y SUBMENUS
+void switch_historial(int opc_submenu){
+	switch(opc_submenu){
+		case 1:{historial_pedidos();
+			break;
+		}
+		case 2:{historial_ventas();
+			break;
+		}
+		case 3:{
+			break;
+		}
+	}
+}
+
+void switch_tipoproductos(int opc_submenu,struct TIPOPRODUCTOS TP,int *num_tipro){
+	switch(opc_submenu){
+		case 1:{registro_tipoproducto(tipoproducto[' '],num_tipro);
+			break;
+		}
+		case 2:{bajas_tipoproducto(tipoproducto[' '],num_tipro);
+			break;
+		}
+		case 3:{consulta(3,num_tipro);
+			break;
+		}
+		case 4:{
+			break;
+		}
+	}
+}
+													
+void switch_registroproductos(int opc_submenu,struct PRODUCTOS p,int *num_pro){
+	switch(opc_submenu){
+		case 1:{registro_producto(producto[' '],num_pro);
+			break;
+		}
+		case 2:{bajas_productos(producto[' '],num_pro);
+			break;
+		}
+		case 3:{consulta(2,num_pro);
+			break;
+		}
+		case 4:{resurtido(producto[' '],num_pro);
+			break;
+		}
+		case 5:{
+			break;
+		}
+	}
+}
+																										
+//Imprime el submenu de ventas.
+void submenu_venta(){
+	printf("\t\t1. Alta.\n\t\t2. Consulta.\n\t\t3. Regresar al men%c principal.\n\t>",163);
+}
+
+//Imprime el submenu de pedidos.
+void submenu_pedido(){
+	printf("\t\t1. Alta.\n\t\t2. Cancelar.\n\t\t3. Consulta.\n\t\t4. Env%co.\n\t\t5. Regresar al men%c principal.\n\t>",161,163);
+}
+
+//Imprime el submenu de pedido o venta.
+void switch_pedidoventa(int opc_submenu){
+	int opc_pedidoventa;
+	switch(opc_submenu){
+		case 1:{
+				do{
+					do{
+						printf("\t\t\t\tRegistro pedido.\n");
+						submenu_pedido();
+						scanf("%d",&opc_pedidoventa);
+						fflush(stdin);
+						system("cls");
+					}while(opc_pedidoventa<1||opc_pedidoventa>5);
+				}while(opc_pedidoventa!=5);
+			break;
+		}
+		case 2:{
+				do{
+					do{
+						printf("\t\t\t\t\tRegistro venta.\n");
+						submenu_venta();
+						scanf("%d",&opc_pedidoventa);
+						fflush(stdin);
+						system("cls");
+					}while(opc_pedidoventa<1||opc_pedidoventa>3);
+				}while(opc_pedidoventa!=3);
+						
+			break;
+		}
+	}
+}
+
+//Submenu de clientes y tipo producto.
+void submenus_registros(){
+	printf("\t\t1. Alta.\n\t\t2. Baja.\n\t\t3. Consulta.\n\t\t4. Regresar al men%c.\n\t>",163);
+}
+
+//Submenu de productos.
+void submenus_registros1(){
+	printf("\t\t1. Alta.\n\t\t2. Baja.\n\t\t3. Consulta.\n\t\t4. Resurtido.\n\t\t5. Regresar al men%c.\n\t>",163);
+}
+
+//Imprime los submenus (si existen).
+void sub_menus(int men,struct CLIENTES c,int *num_cl,int *num_pro,int *num_tipro){
+	int opc_submenu;
+	switch(men){
+		case 1:{//PRIMERA OPCIÓN REGISTRO CLIENTE.
+				do{
+					do{
+						printf("\t\t\t\t\tRegistro de clientes.\n");
+						submenus_registros();
+						scanf("%d",&opc_submenu);
+						fflush(stdin);
+						system("cls");
+					}while(opc_submenu<1||opc_submenu>4);
+					switch_registroclientes(opc_submenu,cliente[' '],num_cl);
+				}while(opc_submenu!=4);				
+			break;
+		}
+		case 2:{
+				do{
+					do{
+						printf("\t\t\t\t\tRegistro de productos.\n");
+						submenus_registros1();
+						scanf("%d",&opc_submenu);
+						fflush(stdin);
+						system("cls");
+					}while(opc_submenu<1||opc_submenu>5);
+					switch_registroproductos(opc_submenu,producto[' '],num_pro);
+				}while(opc_submenu!=5);
+				
+			break;
+		}
+		case 3:{
+				do{
+					do{
+						printf("\t\t\t\t\tRegistro de tipo de producto.\n");
+						submenus_registros();
+						scanf("%d",&opc_submenu);
+						fflush(stdin);
+						system("cls");
+					}while(opc_submenu<1||opc_submenu>4);
+					switch_tipoproductos(opc_submenu,tipoproducto[' '],num_tipro);
+				}while(opc_submenu!=4);
+			break;
+		}
+		case 4:{
+				do{
+					printf("\t\t\t\t\tRegistro de Pedido/Venta.\n");
+					printf("\t\t1. Pedido.\n\t\t2. Venta.\n\t>");
+					scanf("%d",&opc_submenu);
+					fflush(stdin);
+					system("cls");
+				}while(opc_submenu<1||opc_submenu>2);
+				switch_pedidoventa(opc_submenu);
+			break;
+		}
+		case 5:{
+				do{
+					printf("\t\t\t\t\tHistorial Pedidos/Ventas.\n");
+					printf("\t\t1. Historial pedidos.\n\t\t2. Historial ventas.\n\t\t3. Salir.\n\t>");
+					scanf("%d",&opc_submenu);
+					fflush(stdin);
+					system("cls");
+				}while(opc_submenu<1||opc_submenu>3);
+				switch_historial(opc_submenu);
+				system("cls");
+			break;
+		}
+		case 6:{
+				reporte_tipoproductos();
+				system("cls");
+			break;
+		}
+	}
+}
+
+//Imprime el menú ya sea de cajero o administrador.
+int menus(struct USUARIOS us,int *num_us,int tipo_usuario){
+	int opc;
+//	printf("%d",tipo_usuario);
+	switch(tipo_usuario){
+		case 0:{
+				if(USUARIO[*num_us].nEstatus==0){
+					printf("\t\t\tSu estatus es inactivo.\n");
+				}else {
+					printf("\t\t\tNo ingres%c la contrase%ca correcta.\n",162,164);
+				}
+				return 0;
+			break;
+		}
+		case 1:{
+				do{
+					printf("\t\t\t\t\tBuen d%ca %s.\n",161,USUARIO[*num_us].sNombre);
+					printf("\t\t\t\tMEN%c PRINCIPAL.\n",233);
+					printf("\t\t1. Registro de cliente.\n\t\t2. Registro de productos.\n\t\t3. Registro tipo de producto.\n\t\t4. Pedido/Venta.\n");
+					printf("\t\t5. Historial pedido/venta.\n\t\t6. Reporte inventario.\n\t\t7. Salir.\n\t>");
+					scanf("%d",&opc);
+					fflush(stdin);
+					system("cls");
+				}while(opc<1||opc>7);
+				if(opc==7){
+					return 0;
+				}
+				return opc;
+			break;
+		}
+		case 2:{
+				do{
+					printf("\t\t\t\t\tBuen d%ca %s.\n",161,USUARIO[*num_us].sNombre);
+					printf("\t\t\t\tMEN%c PRINCIPAL.\n",233);
+					printf("\t\t1. Pedido/Venta.\n\t\t2. Salir.\n\t>");
+					scanf("%d",&opc);
+					fflush(stdin);
+					system("cls");
+				}while(opc<1||opc>2);
+				if(opc==2){
+					return 0;
+				} else{
+					return opc;
+				}
+			break;
+		}
+	}
+}
+
+				//SECCION LOGIN, VERIFICA EL USUARIO Y CONTRASEÑA Y DETERMINA SI ES CAJERO/ADMINISTRADOR O ACTIVO/INACTIVO.
+				
+//Determina si es inactivo o activo, si es activo se agrega si es cajero o administrador.
+int determina(struct USUARIOS us, int aux3){
+	switch(USUARIO[aux3].nEstatus){
+		case 1:{
+				if(USUARIO[aux3].nTipo==1){
+					return 1;
+				} else{
+					return 2;
+				}
+			break;
+		}
+		case 0:{
+				return 0;
+			break;
+		}
+	}
+}
+
+//Verifica el usuario, contraseña, estatus y si es cajero o administrador.
+int verificar(struct USUARIOS US, int j,int *num_us){
+	//AUXILIARES
+	int i;     
+	//i = for
+	int aux=0,aux3,salida=0; 
+	//aux = Ayuda a romper el do - while, aux3 = determina la posición en que se encuentra el usuario
+	//salida = Si el usuario es inactivo
+	char usuario[7];
+	char contrasena[9];
+	int kick=0; 
+	//kick = Veces de intentos
+	int tipo,cierto; 
+	//tipo = Regresa 0 si la persona es inactiva, 1 o 2 si es cajero o administrador. (con base a la función). ->determina
+	//cierto = Si la persona es inactica se iguala a cero o si la persona ingresó mal la contraseña las 3 veces.
+	// Si la persona ingresó la contraseña bien entra al if y retorna si es cajero o administrador. (con base a la función). ->determina
+	
+	printf("\t\t\t\t\t    BIENVENIDO.\n\t\t\t\t\tSUPERMERCADO FCFM.\n");
+	do{ //USUARIO VERIFICAR.
+		printf("\t\t\t\t Ingrese su usuario: ");
+		scanf("%s",&usuario);
+		for(i=0;i<j;i++){
+			if(strcmp(usuario,USUARIO[i].SUsuario)==0){
+				if(USUARIO[i].nEstatus==0){
+					printf("\t\t\tSu estatus es inactivo.\n");
+					aux=1;
+					salida=0;
+					cierto=0;
+					aux3=i;
+					break;
+				}
+				printf("\t\t\t>Usuario correcto.\n\n");
+				aux=1;
+				aux3=i;
+				salida=1;
+				break;
+			}
+		}
+		if(i==j&&aux==0){
+			printf("\t\t\t>Usuario incorrecto.\n\n");
+			aux=0;
+		}
+	}while(aux==0); 
+
+	if(salida==0){
+	}else {
+		do{ //CONTRASEÑA VERIFICAR.
+			printf("\t\t\t\t Ingrese su contrase%ca: ",164);
+			scanf("%s",&contrasena);
+			if(strcmp(contrasena,USUARIO[aux3].sPassword)==0){				
+				printf("\t\t\t>Contrase%ca correcta.\n",164);
+				aux=1;
+				cierto=1;			
+			} else{
+				aux=0;
+				kick++;
+			}
+			if(kick==3){
+				aux=1;
+				cierto=0;
+				printf("\t\t\t>Contacte al administrador.\n");
+			}
+		}while(aux==0);
+	}
+	system("pause");
+	system("cls");
+	*num_us=aux3;
+	if(cierto==1){
+		tipo=determina(USUARIO[' '],aux3);
+		return tipo;
+	} else{
+		return 0;
+	}
+}
+
+													//AUXILIARES
+
+int mostrar_producto(struct PRODUCTOS p,int *num_pro){
+	//AUXILIARES
+	int i;
+	//i = controlador del for. Returna el número de posición en que se encuentra.
+	int s;
+	//s = determina si la información es correcta.
+	int sel;
+	//sel = ingresa la clave del producto.
+	int num;
+	num=*num_pro;
+	do{
+		do{
+			printf("\t\t\t\tIngrese la clave del producto a resurtir: ");
+			scanf("%d",&sel);
+			fflush(stdin);
+			system("cls");
+		}while(sel<=0);
+		for(i=0;i<num;i++){
+			if(sel==producto[i].idProducto){
+				do{
+					printf("\t\t%cEs esta la informaci%cn correcta del producto%c\n\n",168,162,63);
+					printf("\t\t\tidProducto\tDescripci%cn\tidTipoProd\tnExistencia\tPrecio\t\tEstatus\n");
+					printf("\t\t\t%d\t\t%s\t\t%d\t\t%d\t\t%.2f\t\t%d\n",producto[i].idProducto,producto[i].Descripcion,producto[i].idTipoProd,producto[i].nExistencia,producto[i].Precio,producto[i].Estatus);
+					printf("\t\t1. S%c.\n\t\t2. No.\n>",161);
+					scanf("%d",&s);
+					fflush(stdin);
+				}while(s<1||s>2);
+				if(s==1){
+					s=1;
+					return i;
+				} else {
+					s=0;
+				}	
+			}
+		}
+		if(i==num){
+			printf("\t\t\tLa clave de producto no se ha encontrado.\n\t\tVerif%cque, por favor.\n\n",161);
+			s=salida();
+			if(s==2){
+				s=0;
+			} else {
+				s=1;
+				return 0;
+				
+			}
+			system("cls");
+		}
+	}while(s==0);	
+	
+}
+									
+int validar_tel(){
+	int tel;
+	do{
+		printf("\t\t\tIngrese su tel%cfono: ",130);
+		scanf("%d",&tel);
+		fflush(stdin);
+	}while(tel<=0);
+	return tel;
+}
+
+int validar_casa(){
+	int num_casa;
+	do{
+		printf("\t\t\tIngrese su n%cmero de casa: ",163);
+		scanf("%d",&num_casa);
+		fflush(stdin);
+	}while(num_casa<=0);
+	return num_casa;
+}
+
+int salida(){
+	int opc;
+	do{
+		printf("\t\t\t%cDesea salir%c.\n\t1. S%c.\n\t2. No\n\t>",168,63,161);
+		scanf("%d",&opc);
+		fflush(stdin);
+	}while(opc<1||opc>2);
+	return opc;
+}													
+void consulta(int num_menu, int *nume){
+	system("cls");
+	int verif, i, num, encontrado=0;
+	/* 	verif sirve como auxiliar para verificar si existe el producto/cliente/tipo de producto
+		i sirve como contador para el for que va a recorrer las distintas estructuras
+		num sirve para obtener la variable apuntador "num_cl"
+		encontrado sirve para verificar que se encontró el producto/cliente/tipo de producto
+	*/
+	
+	char nom_consulta[' '];
+	// 	nom_consulta sirve como auxiliar para comparar el nombre de lo que se desea consultar con el producto/cliente/tipo de producto
+	switch(num_menu){
+		case 1:{
+			num=*nume;
+			printf("\t\t\t\tConsulta\n\n\t\tIngrese el nombre del cliente a consultar:\n\t>");
+			gets(nom_consulta);
+			fflush(stdin);
+			for(i=0;i<num;i++)
+			{
+				verif=strcmp(nom_consulta,cliente[i].Nombre);
+				if(verif==0)
+				{
+					printf("\n\n\t\t\tid del Cliente: %d\n\t\t\tNombre: %s",cliente[i].idCliente,cliente[i].Nombre);
+					printf("\n\t\t\tCalle:%s\n\t\t\tColonia: %s\n\t\t\tN%cmero de casa: %d",cliente[i].Calle,cliente[i].Colona,163,cliente[i].Num_casa);
+					printf("\n\t\t\tT%clefono: %d\n\t\t\tEstatus: %d\n\n",130,cliente[i].Telefono,cliente[i].Estatus);
+					system("pause");
+					system("cls");
+					encontrado=1;
+				}
+			}
+			if(encontrado!=1)
+			{
+				printf("\n\t\t\tNo se encontr%c ning%cn cliente.\n\n",162,163);
+				system("pause");
+				system("cls");
+			}
+			break;
+		}
+		case 2:{
+			num=*nume;
+			printf("\t\t\t\tConsulta\n\n\t\tIngrese el nombre del producto a consultar:\n\t>");
+			gets(nom_consulta);
+			fflush(stdin);
+			for(i=0;i<num;i++)
+			{
+				verif=strcmp(nom_consulta,producto[i].Descripcion);
+				if(verif==0)
+				{
+					printf("\n\n\t\t\tid del Producto: %d\n\t\t\tDescripci%cn: %s",producto[i].idProducto,162,producto[i].Descripcion);
+					printf("\n\t\t\tid del Tipo Producto:%d\n\t\t\tNo. en Existencia: %d",producto[i].idProducto,producto[i].nExistencia);
+					printf("\n\t\t\tPrecio: %d\n\t\t\tEstatus: %d\n\n",producto[i].Precio,producto[i].Estatus);
+					system("pause");
+					system("cls");
+					encontrado=1;
+				}
+			}
+			if(encontrado!=1)
+			{
+				printf("\n\t\t\tNo se encontr%c ning%cn producto.\n\n",162,163);
+				system("pause");
+				system("cls");
+			}
+			break;
+		}
+		case 3:{
+			num=*nume;
+			printf("\t\t\t\tConsulta\n\n\t\tIngrese el nombre del tipo de producto a consultar:\n\t>");
+			gets(nom_consulta);
+			fflush(stdin);
+			for(i=0;i<num;i++)
+			{
+				verif=strcmp(nom_consulta,tipoproducto[i].Descripcion);
+				if(verif==0)
+				{
+					printf("\n\n\t\t\tid del Tipo de Producto: %d\n\t\t\tDescripci%cn: %s",tipoproducto[i].idTipoProd,162,tipoproducto[i].Descripcion);
+					printf("\n\t\t\tEstatus: %d\n\n",tipoproducto[i].Estatus);
+					system("pause");
+					system("cls");
+					encontrado=1;
+				}
+			}
+			if(encontrado!=1)
+			{
+				printf("\n\t\t\tNo se encontr%c ning%cn tipo de producto.\n\n",162,163);
+				system("pause");
+				system("cls");
+			}
+			break;
+		}
+	}
+}
+
+void reporte_tipoproductos(){
+	time_t t;
+	struct tm *tm;
+	char fechayhora[100];
+	t=time(NULL);
+	tm=localtime(&t);
+	system("color 0f");
+	strftime(fechayhora,100,"%d/%m/%Y",tm);
+	printf("\n\tReporte Inventario al d%ca de: %s",161,fechayhora);
+	printf("\n\n\t%-15s\t%-15s\t%-13s\t%-11s\n","Tipo Producto","Cve Producto","Descripcion","Existencia");
+	printf("\n\n");
+	system("pause");
+}
+
+void historial_pedidos(){
+	time_t tiempo=time(0);
+	struct tm *tlocal=localtime(&tiempo);
+	char fechayhora[128];
+	system("color 0f");
+	printf("\n\t\t\t\tHISTORIAL PEDIDO");
+	strftime(fechayhora,100,"%d/%m/%Y",tlocal);
+	printf("\n\n\t\t\t\t\t\t\t\tFECHA : %s",fechayhora);
+	printf("\n\n\t%-15s\t%-20s\t%-15s","CVE PEDIDO:","FECHA ENTREGA:","ENVIADO:");
+	printf("\n\n\t%-15s\t%-20s","CVE CLIENTE:","NOMBRE CLIENTE:");
+	printf("\n\n\t%-15s\t%-15s\t%-10s\t%-8s\t%-6s","CVE PRODUCTO","DESCRIPCION","CANTIDAD","PRECIO","TOTAL");
+	printf("\n\n\t%48s","SUBTOTAL");
+	printf("\n\n\t%48s","IVA");
+	printf("\n\n\t%48s","TOTAL");
+	strftime(fechayhora,128,"%d/%m/%Y %H:%M:%S",tlocal);
+	printf("\n\n\tImpresion del Reporte: %s",fechayhora);
+	printf("\n\n");
+	system("pause");
+}
+
+void historial_ventas(){
+	time_t tiempo=time(0);
+	struct tm *tlocal=localtime(&tiempo);
+	char fechayhora[128];
+	system("color 0f");
+	printf("\n\t\t\t\tHISTORIAL DE VENTAS");
+	strftime(fechayhora,128,"%d/%m/%Y",tlocal);
+	printf("\n\t\t\t\t\t\t\t\tFECHA : %s",fechayhora);
+	printf("\n\tCVE VENTA: ");
+	printf("\n\t%-13s\t%-13s\t%-10s\t%-8s\t%-6s","CVE PRODUCTO","DESCRIPCION","CANTIDAD","PRECIO","TOTAL");
+	printf("\n\n\n\t%48s","SUBTOTAL");
+	printf("\n\n\t%48s","IVA");
+	printf("\n\n\t%48s","TOTAL");
+	strftime(fechayhora,128,"%d/%m/%Y %H:%M:%S",tlocal);
+	printf("\n\n\n\tImpresion del Reporte: %s\n",fechayhora);
+	printf("\n\n");
+	system("pause");
+}
