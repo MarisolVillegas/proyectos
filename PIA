@@ -2,7 +2,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-
+struct Usuarios{
+	int idUs;
+	char Nickname[7];
+	char pass[9];
+	char nombre[10];
+	int Uestatus;
+	int tipo;
+}user[' '];
+/*
 struct USUARIOS{
 	int idUsuario;
 	char SUsuario[7];
@@ -11,8 +19,18 @@ struct USUARIOS{
 	int nEstatus;
 	int nTipo;
 }USUARIO[' '];
+*/
 
-struct CLIENTES{
+struct Clientes{
+	int idCliente;
+	char Nombre[' '];
+	char Calle[' '];
+	char Colonia[' '];
+	int NumeroCasa;
+	int Telefono;
+	int Cestatus;
+}cliente[' '];
+/*struct CLIENTES{
 	int idCliente;
 	char Nombre[' '];
 	char Calle[' '];
@@ -20,8 +38,23 @@ struct CLIENTES{
 	int Num_casa;
 	int Telefono;
 	int Estatus;
-}cliente[' '];
+}cliente[' '];*/
 
+struct Productos{
+	int idProducto;
+	char Descripcion[' '];
+	int idTipoProd;
+	int nExistencia;
+	float Precio;
+	int Pestatus;
+}prod[' '];
+
+struct TipoProducto{
+	int idTipoProd;
+	char Descripcion [' '];
+	int Tpestatus;
+}tp[' '];
+/*
 struct PRODUCTOS{
 	int idProducto;
 	char Descripcion[' '];
@@ -35,7 +68,7 @@ struct TIPOPRODUCTOS{
 	int idTipoProd;
 	char Descripcion[' '];
 	int Estatus;
-}tipoproducto[' '];
+}tipoproducto[' '];*/
 
 //AUXILIARES
 int validar_tel(); //VALIDA QUE EL TELÉFONO SEA POSITIVO Y NO CARACTER.
